@@ -1,6 +1,13 @@
-# MCP Inspector
+# kargnas's Better MCP Inspector
+
+[![Publish Package](https://github.com/kargnas/mcp-inspector/actions/workflows/publish.yml/badge.svg)](https://github.com/kargnas/mcp-inspector/actions/workflows/publish.yml)
 
 The MCP inspector is a developer tool for testing and debugging MCP servers.
+
+## What's New
+
+- Enhanced the JsonView with JSON node size calculation and display capabilities for clearer insights into payloads.
+- Refined the JsonView size formatting and byte-length detection to improve accuracy across environments.
 
 ![MCP Inspector Screenshot](https://raw.githubusercontent.com/modelcontextprotocol/inspector/main/mcp-inspector.png)
 
