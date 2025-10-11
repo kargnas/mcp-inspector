@@ -7,14 +7,17 @@ on:
 
 jobs:
   publish:
-    name: Publish to npm
+    if: github.actor != 'github-actions[bot]'
+    name: Release and publish to npm
     runs-on: ubuntu-latest
+    environment: deploy
     permissions:
-      contents: read
-      id-token: write
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -22,13 +25,67 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Calculate next minor version
+        id: version
+        run: |
+          NEXT_VERSION=$(node --input-type=module - <<'NODE'
+          import { readFileSync } from 'node:fs';
+
+          const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+          const [major, minor, patch] = pkg.version.split('.').map(Number);
+          const nextMinor = `${major}.${minor + 1}.0`;
+          console.log(nextMinor);
+          NODE
+          )
+          echo "value=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Update package versions
+        run: node scripts/update-version.js ${{ steps.version.outputs.value }}
 
       - name: Build packages
         run: npm run build
 
+      - name: Commit release
+        id: commit
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "chore: release v${RELEASE_VERSION}"
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create git tag
+        if: steps.commit.outputs.committed == 'true'
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.value }}
+        run: git tag v${RELEASE_VERSION}
+
+      - name: Configure npm authentication
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cat <<EONPMRC > ~/.npmrc
+          //registry.npmjs.org/:_authToken=${NPM_TOKEN}
+          always-auth=true
+          EONPMRC
+
       - name: Publish packages
-        run: npm run publish-all
+        if: steps.commit.outputs.committed == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm run publish-all
+
+      - name: Push release commit and tag
+        if: steps.commit.outputs.committed == 'true'
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          git push origin HEAD:main
+          git push origin v${RELEASE_VERSION}
