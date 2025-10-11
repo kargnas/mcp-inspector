@@ -1,5 +1,5 @@
 {
-  "name": "@kargn.as/mcp-inspector",
+  "name": "kargnas-mcp-inspector",
   "version": "0.17.0",
   "description": "Model Context Protocol inspector",
   "license": "MIT",
@@ -47,9 +47,9 @@
     "check-version": "node scripts/check-version-consistency.js"
   },
   "dependencies": {
-    "@kargn.as/mcp-inspector-cli": "^0.17.0",
-    "@kargn.as/mcp-inspector-client": "^0.17.0",
-    "@kargn.as/mcp-inspector-server": "^0.17.0",
+    "kargnas-mcp-inspector-cli": "^0.17.0",
+    "kargnas-mcp-inspector-client": "^0.17.0",
+    "kargnas-mcp-inspector-server": "^0.17.0",
     "@modelcontextprotocol/sdk": "^1.18.0",
     "concurrently": "^9.2.0",
     "node-fetch": "^3.3.2",

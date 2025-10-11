@@ -61,7 +61,7 @@ packagePaths.forEach((packagePath) => {
     // Update workspace dependencies in root package.json
     if (packagePath === "package.json" && packageJson.dependencies) {
       Object.keys(packageJson.dependencies).forEach((dep) => {
-        if (dep.startsWith("@kargn.as/mcp-inspector-")) {
+        if (dep.startsWith("kargnas-mcp-inspector-")) {
           packageJson.dependencies[dep] = `^${newVersion}`;
         }
       });

@@ -1,5 +1,5 @@
 {
-  "name": "@kargn.as/mcp-inspector-cli",
+  "name": "kargnas-mcp-inspector-cli",
   "version": "0.17.0",
   "description": "CLI for the Model Context Protocol inspector",
   "license": "MIT",
