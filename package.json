@@ -1,11 +1,15 @@
 {
-  "name": "@modelcontextprotocol/inspector",
+  "name": "kargnas/mcp-inspector",
   "version": "0.17.0",
   "description": "Model Context Protocol inspector",
   "license": "MIT",
-  "author": "Anthropic, PBC (https://anthropic.com)",
-  "homepage": "https://modelcontextprotocol.io",
-  "bugs": "https://github.com/modelcontextprotocol/inspector/issues",
+  "author": "kargnas",
+  "homepage": "https://github.com/kargnas/mcp-inspector",
+  "bugs": "https://github.com/kargnas/mcp-inspector/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kargnas/mcp-inspector.git"
+  },
   "type": "module",
   "bin": {
     "mcp-inspector": "cli/build/cli.js"

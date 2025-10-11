@@ -102,7 +102,7 @@ function createTransportOptions(
 async function callMethod(args: Args): Promise<void> {
   // Read package.json to get name and version for client identity
   const pathA = "../package.json"; // We're in package @modelcontextprotocol/inspector-cli
-  const pathB = "../../package.json"; // We're in package @modelcontextprotocol/inspector
+  const pathB = "../../package.json"; // We're in package kargnas/mcp-inspector
   let packageJson: { name: string; version: string };
   let packageJsonData = await import(fs.existsSync(pathA) ? pathA : pathB, {
     with: { type: "json" },
