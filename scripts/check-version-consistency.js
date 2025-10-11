@@ -88,7 +88,7 @@ if (rootPackage) {
   let dependencyErrors = false;
 
   Object.entries(rootPackage.dependencies).forEach(([dep, version]) => {
-    if (dep.startsWith("@modelcontextprotocol/inspector-")) {
+    if (dep.startsWith("@kargn.as/mcp-inspector-")) {
       const expectedDepVersion = `^${expectedVersion}`;
       if (version !== expectedDepVersion) {
         console.error(
@@ -132,9 +132,9 @@ if (!fs.existsSync(lockPath)) {
     // Check workspace package versions in lock file
     if (lockFile.packages) {
       const workspacePackages = [
-        { path: "client", name: "@modelcontextprotocol/inspector-client" },
-        { path: "server", name: "@modelcontextprotocol/inspector-server" },
-        { path: "cli", name: "@modelcontextprotocol/inspector-cli" },
+        { path: "client", name: "@kargn.as/mcp-inspector-client" },
+        { path: "server", name: "@kargn.as/mcp-inspector-server" },
+        { path: "cli", name: "@kargn.as/mcp-inspector-cli" },
       ];
 
       workspacePackages.forEach(({ path, name }) => {

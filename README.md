@@ -24,7 +24,7 @@ Note that the proxy is not a network proxy for intercepting traffic. Instead, it
 To get up and running right away with the UI, just execute the following:
 
 ```bash
-npx @modelcontextprotocol/inspector
+npx @kargn.as/mcp-inspector
 ```
 
 The server will start up and the UI will be accessible at `http://localhost:6274`.
@@ -42,29 +42,29 @@ docker run --rm --network host -p 6274:6274 -p 6277:6277 ghcr.io/modelcontextpro
 To inspect an MCP server implementation, there's no need to clone this repo. Instead, use `npx`. For example, if your server is built at `build/index.js`:
 
 ```bash
-npx @modelcontextprotocol/inspector node build/index.js
+npx @kargn.as/mcp-inspector node build/index.js
 ```
 
 You can pass both arguments and environment variables to your MCP server. Arguments are passed directly to your server, while environment variables can be set using the `-e` flag:
 
 ```bash
 # Pass arguments only
-npx @modelcontextprotocol/inspector node build/index.js arg1 arg2
+npx @kargn.as/mcp-inspector node build/index.js arg1 arg2
 
 # Pass environment variables only
-npx @modelcontextprotocol/inspector -e key=value -e key2=$VALUE2 node build/index.js
+npx @kargn.as/mcp-inspector -e key=value -e key2=$VALUE2 node build/index.js
 
 # Pass both environment variables and arguments
-npx @modelcontextprotocol/inspector -e key=value -e key2=$VALUE2 node build/index.js arg1 arg2
+npx @kargn.as/mcp-inspector -e key=value -e key2=$VALUE2 node build/index.js arg1 arg2
 
 # Use -- to separate inspector flags from server arguments
-npx @modelcontextprotocol/inspector -e key=$VALUE -- node build/index.js -e server-flag
+npx @kargn.as/mcp-inspector -e key=$VALUE -- node build/index.js -e server-flag
 ```
 
 The inspector runs both an MCP Inspector (MCPI) client UI (default port 6274) and an MCP Proxy (MCPP) server (default port 6277). Open the MCPI client UI in your browser to use the inspector. (These ports are derived from the T9 dialpad mapping of MCPI and MCPP respectively, as a mnemonic). You can customize the ports if needed:
 
 ```bash
-CLIENT_PORT=8080 SERVER_PORT=9000 npx @modelcontextprotocol/inspector node build/index.js
+CLIENT_PORT=8080 SERVER_PORT=9000 npx @kargn.as/mcp-inspector node build/index.js
 ```
 
 For more details on ways to use the inspector, see the [Inspector section of the MCP docs site](https://modelcontextprotocol.io/docs/tools/inspector). For help with debugging, see the [Debugging guide](https://modelcontextprotocol.io/docs/tools/debugging).
@@ -249,7 +249,7 @@ These settings can be adjusted in real-time through the UI and will persist acro
 The inspector also supports configuration files to store settings for different MCP servers. This is useful when working with multiple servers or complex configurations:
 
 ```bash
-npx @modelcontextprotocol/inspector --config path/to/config.json --server everything
+npx @kargn.as/mcp-inspector --config path/to/config.json --server everything
 ```
 
 Example server configuration file:
@@ -328,7 +328,7 @@ You can launch the inspector without specifying a server name if your config has
 
 ```bash
 # Automatically uses "my-server" if it's the only one
-npx @modelcontextprotocol/inspector --config mcp.json
+npx @kargn.as/mcp-inspector --config mcp.json
 ```
 
 2. **A server named "default-server"** - automatically selected:
@@ -401,47 +401,47 @@ npm start
 CLI mode enables programmatic interaction with MCP servers from the command line, ideal for scripting, automation, and integration with coding assistants. This creates an efficient feedback loop for MCP server development.
 
 ```bash
-npx @modelcontextprotocol/inspector --cli node build/index.js
+npx @kargn.as/mcp-inspector --cli node build/index.js
 ```
 
 The CLI mode supports most operations across tools, resources, and prompts. A few examples:
 
 ```bash
 # Basic usage
-npx @modelcontextprotocol/inspector --cli node build/index.js
+npx @kargn.as/mcp-inspector --cli node build/index.js
 
 # With config file
-npx @modelcontextprotocol/inspector --cli --config path/to/config.json --server myserver
+npx @kargn.as/mcp-inspector --cli --config path/to/config.json --server myserver
 
 # List available tools
-npx @modelcontextprotocol/inspector --cli node build/index.js --method tools/list
+npx @kargn.as/mcp-inspector --cli node build/index.js --method tools/list
 
 # Call a specific tool
-npx @modelcontextprotocol/inspector --cli node build/index.js --method tools/call --tool-name mytool --tool-arg key=value --tool-arg another=value2
+npx @kargn.as/mcp-inspector --cli node build/index.js --method tools/call --tool-name mytool --tool-arg key=value --tool-arg another=value2
 
 # Call a tool with JSON arguments
-npx @modelcontextprotocol/inspector --cli node build/index.js --method tools/call --tool-name mytool --tool-arg 'options={"format": "json", "max_tokens": 100}'
+npx @kargn.as/mcp-inspector --cli node build/index.js --method tools/call --tool-name mytool --tool-arg 'options={"format": "json", "max_tokens": 100}'
 
 # List available resources
-npx @modelcontextprotocol/inspector --cli node build/index.js --method resources/list
+npx @kargn.as/mcp-inspector --cli node build/index.js --method resources/list
 
 # List available prompts
-npx @modelcontextprotocol/inspector --cli node build/index.js --method prompts/list
+npx @kargn.as/mcp-inspector --cli node build/index.js --method prompts/list
 
 # Connect to a remote MCP server (default is SSE transport)
-npx @modelcontextprotocol/inspector --cli https://my-mcp-server.example.com
+npx @kargn.as/mcp-inspector --cli https://my-mcp-server.example.com
 
 # Connect to a remote MCP server (with Streamable HTTP transport)
-npx @modelcontextprotocol/inspector --cli https://my-mcp-server.example.com --transport http --method tools/list
+npx @kargn.as/mcp-inspector --cli https://my-mcp-server.example.com --transport http --method tools/list
 
 # Connect to a remote MCP server (with custom headers)
-npx @modelcontextprotocol/inspector --cli https://my-mcp-server.example.com --transport http --method tools/list --header "X-API-Key: your-api-key"
+npx @kargn.as/mcp-inspector --cli https://my-mcp-server.example.com --transport http --method tools/list --header "X-API-Key: your-api-key"
 
 # Call a tool on a remote server
-npx @modelcontextprotocol/inspector --cli https://my-mcp-server.example.com --method tools/call --tool-name remotetool --tool-arg param=value
+npx @kargn.as/mcp-inspector --cli https://my-mcp-server.example.com --method tools/call --tool-name remotetool --tool-arg param=value
 
 # List resources from a remote server
-npx @modelcontextprotocol/inspector --cli https://my-mcp-server.example.com --method resources/list
+npx @kargn.as/mcp-inspector --cli https://my-mcp-server.example.com --method resources/list
 ```
 
 ### UI Mode vs CLI Mode: When to Use Each
