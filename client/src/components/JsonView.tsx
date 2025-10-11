@@ -8,6 +8,43 @@ import { useToast } from "@/lib/hooks/useToast";
 import { getDataType, tryParseJson } from "@/utils/jsonUtils";
 import useCopy from "@/lib/hooks/useCopy";
 
+const textEncoder = new TextEncoder();
+
+const formatSize = (bytes: number): string => {
+  if (!Number.isFinite(bytes) || bytes <= 0) {
+    return "0 B";
+  }
+
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let size = bytes;
+  let unitIndex = 0;
+
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex++;
+  }
+
+  const formatter =
+    size >= 100 || unitIndex === 0 ? size.toFixed(0) : size.toFixed(1);
+  return `${formatter} ${units[unitIndex]}`;
+};
+
+const calculateJsonSize = (value: JsonValue): number => {
+  if (value === undefined) {
+    return textEncoder.encode("undefined").length;
+  }
+
+  try {
+    const stringified = JSON.stringify(value);
+    if (stringified === undefined) {
+      return textEncoder.encode(String(value)).length;
+    }
+    return textEncoder.encode(stringified).length;
+  } catch {
+    return textEncoder.encode(String(value)).length;
+  }
+};
+
 interface JsonViewProps {
   data: unknown;
   name?: string;
@@ -114,6 +151,13 @@ const JsonNode = memo(
       default: "text-gray-700",
     });
     const dataType = getDataType(data);
+    const nodeSize = useMemo(() => calculateJsonSize(data), [data]);
+    const sizeLabel = formatSize(nodeSize);
+    const sizeIndicator = (
+      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+        ({sizeLabel})
+      </span>
+    );
 
     const [copied, setCopied] = useState(false);
     useEffect(() => {
@@ -184,6 +228,9 @@ const JsonNode = memo(
               </span>
             )}
             <span className="text-gray-500">{symbolMap.empty}</span>
+            <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+              ({sizeLabel})
+            </span>
           </div>
         );
       }
@@ -209,9 +256,14 @@ const JsonNode = memo(
                   {symbolMap.collapsed}
                 </span>
                 <span className="ml-1 text-gray-700 dark:group-hover:text-gray-100 group-hover:text-gray-400">
-                  {itemCount} {itemCount === 1 ? "item" : "items"}
+                  {itemCount} {itemCount === 1 ? "item" : "items"} ({sizeLabel})
                 </span>
               </>
+            )}
+            {isExpanded && (
+              <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                ({sizeLabel})
+              </span>
             )}
           </div>
           {isExpanded && (
@@ -268,6 +320,7 @@ const JsonNode = memo(
             >
               "{value}"
             </pre>
+            {sizeIndicator}
             <Button
               variant="ghost"
               className="ml-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
@@ -305,6 +358,7 @@ const JsonNode = memo(
           >
             {isExpanded ? `"${value}"` : `"${value.slice(0, maxLength)}..."`}
           </pre>
+          {sizeIndicator}
           <Button
             variant="ghost"
             className="ml-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
@@ -342,6 +396,7 @@ const JsonNode = memo(
             <span className={typeStyleMap[dataType] || typeStyleMap.default}>
               {data === null ? "null" : String(data)}
             </span>
+            {sizeIndicator}
             <Button
               variant="ghost"
               className="ml-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
