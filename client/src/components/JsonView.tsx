@@ -42,6 +42,26 @@ const formatBytes = (bytes: number): string => {
   return `${formattedSize} ${units[unitIndex]}`;
 };
 
+const formatPercentage = (value: number): string => {
+  if (!Number.isFinite(value) || value <= 0) {
+    return "0%";
+  }
+
+  if (value >= 99.5) {
+    return "100%";
+  }
+
+  if (value >= 10) {
+    return `${value.toFixed(0)}%`;
+  }
+
+  if (value >= 1) {
+    return `${value.toFixed(1)}%`;
+  }
+
+  return `${value.toFixed(2)}%`;
+};
+
 const getJsonSize = (value: JsonValue): number => {
   if (value === undefined) {
     return getByteLength("undefined");
@@ -88,6 +108,11 @@ const JsonView = memo(
         : data;
     }, [data]);
 
+    const totalSize = useMemo(
+      () => getJsonSize(normalizedData as JsonValue),
+      [normalizedData],
+    );
+
     const handleCopy = useCallback(() => {
       try {
         navigator.clipboard.writeText(
@@ -128,6 +153,7 @@ const JsonView = memo(
             depth={0}
             initialExpandDepth={initialExpandDepth}
             isError={isError}
+            rootSize={totalSize}
           />
         </div>
       </div>
@@ -143,6 +169,7 @@ interface JsonNodeProps {
   depth: number;
   initialExpandDepth: number;
   isError?: boolean;
+  rootSize: number;
 }
 
 const JsonNode = memo(
@@ -152,6 +179,7 @@ const JsonNode = memo(
     depth = 0,
     initialExpandDepth,
     isError = false,
+    rootSize,
   }: JsonNodeProps) => {
     const { toast } = useToast();
     const [isExpanded, setIsExpanded] = useState(depth < initialExpandDepth);
@@ -167,6 +195,23 @@ const JsonNode = memo(
     const dataType = getDataType(data);
     const nodeSize = useMemo(() => getJsonSize(data), [data]);
     const formattedSize = useMemo(() => formatBytes(nodeSize), [nodeSize]);
+    const percentageOfRoot = useMemo(
+      () => (rootSize > 0 ? (nodeSize / rootSize) * 100 : 0),
+      [nodeSize, rootSize],
+    );
+    const formattedPercentage = useMemo(
+      () => formatPercentage(percentageOfRoot),
+      [percentageOfRoot],
+    );
+    const sizeDetails = useMemo(
+      () => `${formattedSize} • ${formattedPercentage}`,
+      [formattedSize, formattedPercentage],
+    );
+    const shouldHighlight =
+      depth > 0 &&
+      rootSize > 5000 &&
+      dataType === "object" &&
+      percentageOfRoot >= 50;
 
     const [copied, setCopied] = useState(false);
     useEffect(() => {
@@ -230,7 +275,13 @@ const JsonNode = memo(
 
       if (isEmpty) {
         return (
-          <div className="flex items-center">
+          <div
+            className={clsx(
+              "flex items-center rounded px-1 py-0.5",
+              shouldHighlight &&
+                "border border-red-200/80 bg-red-50/70 dark:border-red-900 dark:bg-red-950/40",
+            )}
+          >
             {name && (
               <span className="mr-1 text-gray-600 dark:text-gray-400">
                 {name}:
@@ -238,16 +289,26 @@ const JsonNode = memo(
             )}
             <span className="text-gray-500">{symbolMap.empty}</span>
             <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-              {formattedSize}
+              {sizeDetails}
             </span>
           </div>
         );
       }
 
       return (
-        <div className="flex flex-col">
+        <div
+          className={clsx(
+            "flex flex-col rounded-md",
+            shouldHighlight &&
+              "border border-red-200/80 bg-red-50/60 dark:border-red-900 dark:bg-red-950/30",
+          )}
+        >
           <div
-            className="flex items-center mr-1 rounded cursor-pointer group hover:bg-gray-800/10 dark:hover:bg-gray-800/20"
+            className={clsx(
+              "flex items-center mr-1 rounded cursor-pointer group hover:bg-gray-800/10 dark:hover:bg-gray-800/20 px-1 py-0.5",
+              shouldHighlight &&
+                "bg-red-100/60 hover:bg-red-200/60 dark:bg-red-900/40 dark:hover:bg-red-900/60",
+            )}
             onClick={() => setIsExpanded(!isExpanded)}
           >
             {name && (
@@ -259,12 +320,19 @@ const JsonNode = memo(
               {isExpanded ? symbolMap.open : symbolMap.collapsed}
             </span>
             <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-              {itemCount} {itemCount === 1 ? "item" : "items"} • {formattedSize}
+              {itemCount} {itemCount === 1 ? "item" : "items"} • {sizeDetails}
             </span>
           </div>
           {isExpanded && (
             <>
-              <div className="pl-2 ml-4 border-l border-gray-200 dark:border-gray-800">
+              <div
+                className={clsx(
+                  "pl-2 ml-4 border-l",
+                  shouldHighlight
+                    ? "border-red-200/80 dark:border-red-900"
+                    : "border-gray-200 dark:border-gray-800",
+                )}
+              >
                 {isArray
                   ? (items as JsonValue[]).map((item, index) => (
                       <div key={index} className="my-1">
@@ -273,6 +341,7 @@ const JsonNode = memo(
                           name={`${index}`}
                           depth={depth + 1}
                           initialExpandDepth={initialExpandDepth}
+                          rootSize={rootSize}
                         />
                       </div>
                     ))
@@ -283,6 +352,7 @@ const JsonNode = memo(
                           name={key}
                           depth={depth + 1}
                           initialExpandDepth={initialExpandDepth}
+                          rootSize={rootSize}
                         />
                       </div>
                     ))}
@@ -317,7 +387,7 @@ const JsonNode = memo(
               "{value}"
             </pre>
             <span className="self-center text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-              {formattedSize}
+              {sizeDetails}
             </span>
             <Button
               variant="ghost"
@@ -357,7 +427,7 @@ const JsonNode = memo(
             {isExpanded ? `"${value}"` : `"${value.slice(0, maxLength)}..."`}
           </pre>
           <span className="self-center text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-            {formattedSize}
+            {sizeDetails}
           </span>
           <Button
             variant="ghost"
@@ -397,7 +467,7 @@ const JsonNode = memo(
               {data === null ? "null" : String(data)}
             </span>
             <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-              {formattedSize}
+              {sizeDetails}
             </span>
             <Button
               variant="ghost"
