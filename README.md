@@ -31,7 +31,7 @@ Note that the proxy is not a network proxy for intercepting traffic. Instead, it
 To get up and running right away with the UI, just execute the following:
 
 ```bash
-npx kargnas-mcp-inspector
+npx kargnas-mcp-inspector@latest
 ```
 
 The server will start up and the UI will be accessible at `http://localhost:6274`.
