@@ -1,5 +1,5 @@
 # Build stage
-FROM node:current-alpine3.22 AS builder
+FROM node:24.22.1-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -21,7 +21,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:24-slim
+FROM node:24.22.1-slim
 
 WORKDIR /app
 
